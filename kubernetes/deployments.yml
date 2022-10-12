@@ -1,0 +1,129 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-spotify-server
+  namespace: your-spotify
+  labels:
+    app: your-spotify-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-spotify-server
+  template:
+    metadata:
+      labels:
+        app: your-spotify-server
+    spec:
+      containers:
+      - name: your-spotify-server
+        image: yooooomi/your_spotify_server:latest
+        env:
+        - name: API_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: spotify-config
+              key: API_ENDPOINT
+        - name: CLIENT_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: spotify-config
+              key: CLIENT_ENDPOINT
+        - name: SPOTIFY_PUBLIC
+          valueFrom:
+            secretKeyRef:
+              name: spotify-secret
+              key: SPOTIFY_PUBLIC
+        - name: SPOTIFY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: spotify-secret
+              key: SPOTIFY_SECRET
+        - name: CORS
+          valueFrom:
+            configMapKeyRef:
+              name: spotify-config
+              key: CORS
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: your-spotify-client
+  namespace: your-spotify
+  labels:
+    app: your-spotify-client
+    version: 1.0.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: your-spotify-client
+  template:
+    metadata:
+      labels:
+        app: your-spotify-client
+        version: 1.0.0
+    spec:
+      containers:
+      - name: your-spotify-client
+        image: yooooomi/your_spotify_client:latest
+        env:
+        - name: API_ENDPOINT
+          valueFrom:
+            configMapKeyRef:
+              name: spotify-config
+              key: API_ENDPOINT
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: your-spotify
+  labels:
+    app: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+      - name: mongo
+        image: mongo:4.4.8
+        volumeMounts:
+        - name: data
+          mountPath: /data/db
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: your-spotify-db

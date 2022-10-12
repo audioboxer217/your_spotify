@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: your-spotify-db
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+#<__Your_Chosen_PV_Config__>
+#<__Example__>
+#  hostPath:
+#    path: "/data/your-spotify-db"

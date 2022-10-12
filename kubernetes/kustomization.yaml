@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- namespace.yml
+- pv.yml
+- pvc.yml
+- deployments.yml
+- services.yml
+
+configMapGenerator:
+- name: spotify-config
+  namespace: your-spotify
+  envs:
+  - config.env
+
+secretGenerator:
+- name: spotify-secret
+  namespace: your-spotify
+  envs:
+  - secrets.env
